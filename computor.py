@@ -15,12 +15,12 @@ def print_degree(reduced):
     for i in range(0, 4):
         exponent = "X^" + str(i)
         if reduced.rfind(exponent) != -1:
-            degree = i;
+            degree = i
     print ("Polynomial degree: ", degree)
     return (degree)
 
 def print_discrim(values):
-    discrim = values['a']**2 - 4 * values['a'] * values['c']
+    discrim = values['b']**2 - 4 * values['c'] * values['a']
     if discrim > 0:
         print ("Discriminant is strictly positive, the two solutions are:")
     elif discrim == 0:
@@ -47,12 +47,21 @@ def get_values(argv):
     return (values)
 
 def solve(degree, values):
-    discrim = 1
     if degree == 2:
         discrim = print_discrim(values);
-    if discrim < 0:
-        return
-    pass
+        if discrim < 0:
+            return
+        elif discrim == 0:
+            solution = (values['b'] * -1) / (2 * values['c'])
+            print (solution)
+        elif discrim > 0:
+            s1 = (values['b'] * -1 + sq_rt(discrim)) / (2 * values['c'] * 1.0)
+            s2 = (values['b'] * -1 - sq_rt(discrim)) / (2 * values['c'] * 1.0)
+            print (s1)
+            print (s2)
+    else:
+        solution = (values['a'] * -1) / values['b']
+        print (solution)
 
 def main(argv):
     parse_arg(argv)
@@ -73,7 +82,6 @@ def main(argv):
         return
     del values['d']
     solve(degree, values)
-    print (values)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
