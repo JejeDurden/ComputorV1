@@ -2,64 +2,36 @@
 
 import sys
 import argparse
+from helpers import get_factor, reduced_form
+from maths import sq_rt
 
 def parse_arg(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument("<equation>", help="the full equation as a str (e.g: \"1 * X^0 + 2 * X^1 - 3 * X^2 = 4 * X^0\")")
     args = parser.parse_args()
 
-def reduced_form(values):
-    values['a'] -= values['x']
-    values['b'] -= values['y']
-    values['c'] -= values['z']
-    reduced = "Reduced form: "
-    if values['a'] == 0 and values['b'] == 0 and values['c'] == 0:
-        reduced = reduced + '0 '
-    if values['a'] != 0:
-        reduced = reduced + str(values['a']) + ' * X^0 ';
-    if values['b'] > 0 and values['a'] != 0:
-        reduced = reduced + '+ ' + str(values['b']) + ' * X^1 ';
-    elif values['b'] > 0:
-        reduced = reduced + str(values['b']) + ' * X^1 ';
-    elif values['b'] < 0:
-        reduced = reduced + '- ' + str(values['b']) + ' * X^1 ';
-    if values['c'] > 0 and (values['a'] != 0 or values['b'] != 0):
-        reduced = reduced + '+ ' + str(values['b']) + ' * X^2 ';
-    elif values['c'] > 0:
-        reduced = reduced + str(values['b']) + ' * X^2 ';
-    elif values['c'] < 0:
-        reduced = reduced + '- ' + str(values['c']) + ' * X^2 ';
-    print (reduced + "= 0")
+def print_degree(reduced):
+    degree = -1;
+    for i in range(0, 4):
+        exponent = "X^" + str(i)
+        if reduced.rfind(exponent) != -1:
+            degree = i;
+    print ("Polynomial degree: ", degree)
+    return (degree)
 
-def print_degree(values):
-    if values['c'] != 0:
-        print ("Polynomial degree: 2")
-    elif values['b'] != 0:
-        print ("Polynomial degree: 1")
+def print_discrim(values):
+    discrim = values['a']**2 - 4 * values['a'] * values['c']
+    if discrim > 0:
+        print ("Discriminant is strictly positive, the two solutions are:")
+    elif discrim == 0:
+        print ("Discriminant is 0, the unique solution is:")
     else:
-        print ("Polynomial degree: 0")
+        print ("Discriminant is strictly negative, there is no solution")
+    return (discrim)
 
-def get_factor(equation, exponent):
-    if equation.rfind(exponent) == -1:
-        return (0);
-    else:
-        index = equation.find(exponent) - 4
-        if equation[index].isdigit():
-            number = equation[index]
-            index -= 1
-            while index >= 0:
-                if equation[index].isdigit():
-                    number = number + equation[index]
-                else:
-                    break
-                index -= 1
-            number = int(number[::-1])
-            return (number)
-        else:
-            return (0)
 
 def get_values(argv):
-    values = {'a': 0, 'b': 0, 'c': 0, 'x': 0, 'y': 0, 'z': 0}
+    values = {'a': 0, 'b': 0, 'c': 0, 'd': 0, 'w': 0, 'x': 0, 'y': 0, 'z': 0}
     if argv.rfind("=") == -1:
         return (-1)
     else:
@@ -67,12 +39,20 @@ def get_values(argv):
     values['a'] = get_factor(equation[0], "X^0")
     values['b'] = get_factor(equation[0], "X^1")
     values['c'] = get_factor(equation[0], "X^2")
-    values['x'] = get_factor(equation[1], "X^0")
-    values['y'] = get_factor(equation[1], "X^1")
-    values['z'] = get_factor(equation[1], "X^2")
-    reduced_form(values)
-    print_degree(values)
+    values['d'] = get_factor(equation[0], "X^3")
+    values['w'] = get_factor(equation[1], "X^0")
+    values['x'] = get_factor(equation[1], "X^1")
+    values['y'] = get_factor(equation[1], "X^2")
+    values['z'] = get_factor(equation[1], "X^3")
     return (values)
+
+def solve(degree, values):
+    discrim = 1
+    if degree == 2:
+        discrim = print_discrim(values);
+    if discrim < 0:
+        return
+    pass
 
 def main(argv):
     parse_arg(argv)
@@ -80,6 +60,19 @@ def main(argv):
     if values == -1:
         print ("Equation has wrong format. Use the -h option for help.")
         return
+    reduced = reduced_form(values)
+    del values['w']
+    del values['x']
+    del values['y']
+    del values['z']
+    degree = print_degree(reduced)
+    if degree == -1:
+        print ("Equation has wrong format. Use the -h option for help.")
+    elif degree > 2:
+        print ("The polynomial degree is stricly greater than 2, I can't solve it for now.")
+        return
+    del values['d']
+    solve(degree, values)
     print (values)
 
 if __name__ == "__main__":
