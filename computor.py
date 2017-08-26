@@ -16,7 +16,8 @@ def print_degree(reduced):
         exponent = "X^" + str(i)
         if reduced.rfind(exponent) != -1:
             degree = i
-    print ("Polynomial degree: ", degree)
+    if degree >= 0:
+        print ("Polynomial degree:", degree)
     return (degree)
 
 def print_discrim(values):
@@ -75,8 +76,12 @@ def main(argv):
     del values['y']
     del values['z']
     degree = print_degree(reduced)
-    if degree == -1:
-        print ("Equation has wrong format. Use the -h option for help.")
+    if degree == 0 and reduced == "Reduced form: 0 * X^0 = 0":
+        print ("There is an infinity of solutions.")
+        return
+    elif degree == 0:
+        print ("The solution is 0.")
+        return
     elif degree > 2:
         print ("The polynomial degree is stricly greater than 2, I can't solve it for now.")
         return
